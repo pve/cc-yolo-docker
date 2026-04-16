@@ -9,7 +9,7 @@ services:
       dockerfile: Dockerfile.cc-dev
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - workspace:/workspace
+      - workspace:/root/workspace
       - home:/root/.claude
       - ssh:/root/.ssh
       - data:/root/.nanobot

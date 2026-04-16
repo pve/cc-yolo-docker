@@ -8,11 +8,11 @@ You are running inside a **cc-dev-${INSTANCE}** container on a remote Docker hos
 
 | Item | Value |
 |------|-------|
-| Workspace | `/workspace` — fork of `${UPSTREAM_URL}` |
+| Workspace | `/root/workspace` — fork of `${UPSTREAM_URL}` |
 | Fork | `${FORK_REPO_PATH}` |
 | Registry | `${REGISTRY}` |
 | Docker | Full CLI access via host socket — build, run, inspect, logs |
-| Scripts | `/scripts/` — baked into this image |
+| Scripts | `/root/scripts/` — baked into this image |
 
 You are in **dev**. You do not have access to acceptance or production environments.
 
@@ -39,10 +39,10 @@ User manually approves each promotion gate. You do not promote builds yourself.
 
 | Script | When to use |
 |--------|-------------|
-| `/scripts/setup-dev.sh` | One-time init — already run during container setup |
-| `/scripts/package.sh [tag]` | After tests pass — builds and pushes image to registry |
-| `/scripts/spawn-dev.sh <name>` | To create a parallel dev instance for a separate branch |
-| `/scripts/ls-dev.sh` | To see all running dev instances and their SSH ports |
+| `/root/scripts/setup-dev.sh` | One-time init — already run during container setup |
+| `/root/scripts/package.sh [tag]` | After tests pass — builds and pushes image to registry |
+| `/root/scripts/spawn-dev.sh <name>` | To create a parallel dev instance for a separate branch |
+| `/root/scripts/ls-dev.sh` | To see all running dev instances and their SSH ports |
 
 ---
 
@@ -63,7 +63,7 @@ User manually approves each promotion gate. You do not promote builds yourself.
 Build the project image:
 
 ```bash
-docker build -t project-dev /workspace
+docker build -t project-dev /root/workspace
 ```
 
 Run an ephemeral test container:

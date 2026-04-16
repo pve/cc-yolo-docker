@@ -55,12 +55,11 @@ RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh && \
     printf 'Host github.com\n  StrictHostKeyChecking no\n  IdentityFile /root/.ssh/id_ed25519\n' \
     > /root/.ssh/config && chmod 600 /root/.ssh/config
 
-WORKDIR /workspace
+WORKDIR /root/workspace
 
 # Copy scripts and CLAUDE.md template into the image
-# Scripts are available to CC at /scripts/; template is rendered by setup-dev.sh
-COPY scripts/ /scripts/
-COPY CLAUDE.md.template /scripts/CLAUDE.md.template
-RUN chmod +x /scripts/*.sh
+COPY scripts/ /root/scripts/
+COPY CLAUDE.md.template /root/scripts/CLAUDE.md.template
+RUN chmod +x /root/scripts/*.sh
 
-ENTRYPOINT ["/scripts/entrypoint.sh"]
+ENTRYPOINT ["/root/scripts/entrypoint.sh"]

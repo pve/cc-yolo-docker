@@ -115,12 +115,12 @@ That's all that happens on the remote host. From here on, Claude Code inside the
 
 ```bash
 ssh nanobot-main
-/scripts/setup-dev.sh
+/root/scripts/setup-dev.sh
 ```
 
 `setup-dev.sh` is fully automated — no browser, no manual steps:
 - Generates SSH keypair, adds it as a deploy key to `pve/nanobot-ai` via GitHub API
-- Clones the fork into `/workspace`, adds upstream remote, syncs with `HKUDS/nanobot`
+- Clones the fork into `/root/workspace`, adds upstream remote, syncs with `HKUDS/nanobot`
 - Authenticates gh CLI and logs into ghcr.io — both using `GITHUB_TOKEN`
 
 After this, run `claude` and CC takes over.
@@ -129,14 +129,14 @@ After this, run `claude` and CC takes over.
 
 | Task | How |
 |------|-----|
-| Edit nanobot source | Full read/write on `/workspace` |
+| Edit nanobot source | Full read/write on `/root/workspace` |
 | Build + test nanobot | `docker build` + `docker run --rm` (via host Docker socket) |
 | Read all logs | `docker logs`, files in `/root/.nanobot/` |
-| Commit and push | `git` in `/workspace`, SSH key already configured |
+| Commit and push | `git` in `/root/workspace`, SSH key already configured |
 | Open pull requests | `gh pr create` |
-| Package image to registry | `/scripts/package.sh` → pushes to `ghcr.io/pve/nanobot-ai` |
-| Spawn additional dev instances | `/scripts/spawn-dev.sh feature-x` (has Docker socket) |
-| List running instances | `/scripts/ls-dev.sh` |
+| Package image to registry | `/root/scripts/package.sh` → pushes to `ghcr.io/pve/nanobot-ai` |
+| Spawn additional dev instances | `/root/scripts/spawn-dev.sh feature-x` (has Docker socket) |
+| List running instances | `/root/scripts/ls-dev.sh` |
 | Sync fork with upstream | `git fetch upstream && git merge --ff-only upstream/main` |
 
 ### Ongoing workflow
@@ -147,10 +147,10 @@ claude                              # start Claude Code
 
 # CC works autonomously — edits code, runs tests, reads logs, fixes issues
 # When ready to package:
-/scripts/package.sh                 # builds + pushes ghcr.io/pve/nanobot-ai:dev-<sha>
+/root/scripts/package.sh                 # builds + pushes ghcr.io/pve/nanobot-ai:dev-<sha>
 
 # To work on a parallel branch, CC spawns a new instance:
-/scripts/spawn-dev.sh feature-x    # creates cc-dev-feature-x, prints new port
+/root/scripts/spawn-dev.sh feature-x    # creates cc-dev-feature-x, prints new port
 ```
 
 ---
@@ -159,7 +159,7 @@ claude                              # start Claude Code
 
 ```bash
 # List all dev instances and their SSH ports
-/scripts/ls-dev.sh
+/root/scripts/ls-dev.sh
 
 # Stop an instance (preserves volumes)
 docker compose -p cc-dev-feature-x -f /path/to/docker-compose.dev.yml stop
@@ -182,4 +182,4 @@ docker compose -p cc-dev-feature-x -f /path/to/docker-compose.dev.yml down -v
 | `scripts/ls-dev.sh` | Remote host or CC in container | List instances + SSH ports |
 | `scripts/setup-dev.sh` | CC in container (once) | Clone fork, auth, deploy key, render + commit CLAUDE.md — fully automated |
 | `scripts/package.sh` | CC in container | Build + tag + push image to ghcr.io |
-| `CLAUDE.md.template` | `setup-dev.sh` | Template rendered into `/workspace/CLAUDE.md` on first setup |
+| `CLAUDE.md.template` | `setup-dev.sh` | Template rendered into `/root/workspace/CLAUDE.md` on first setup |

@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # setup-dev.sh — one-time setup inside a cc-dev container
-# Run: docker exec cc-dev-<instance> /scripts/setup-dev.sh
+# Run: docker exec cc-dev-<instance> /root/scripts/setup-dev.sh
 # Fully non-interactive: deploy key is added to GitHub automatically via gh API.
 
 set -euo pipefail
 
 FORK_SSH="git@github.com:${FORK_REPO_PATH}.git"
-WORKSPACE="/workspace"
+WORKSPACE="/root/workspace"
 
 echo "==> Authenticating gh CLI"
 echo "${GITHUB_TOKEN}" | gh auth login --with-token
@@ -61,7 +61,7 @@ git merge --ff-only upstream/main || {
 
 echo "==> Generating CLAUDE.md in workspace (if not already present)"
 if [ ! -f "${WORKSPACE}/CLAUDE.md" ]; then
-    envsubst < /scripts/CLAUDE.md.template > "${WORKSPACE}/CLAUDE.md"
+    envsubst < /root/scripts/CLAUDE.md.template > "${WORKSPACE}/CLAUDE.md"
     cd "${WORKSPACE}"
     git add CLAUDE.md
     git commit -m "chore: add CLAUDE.md for cc-dev environment

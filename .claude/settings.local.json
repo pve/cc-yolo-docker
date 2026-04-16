@@ -11,7 +11,10 @@
       "Bash(chmod +x /Users/peter/Documents/DocsMBPPve/apps/2026/cc-docker-test/dev/scripts/spawn-dev.sh /Users/peter/Documents/DocsMBPPve/apps/2026/cc-docker-test/dev/scripts/ls-dev.sh /Users/peter/Documents/DocsMBPPve/apps/2026/cc-docker-test/dev/scripts/entrypoint.sh)",
       "Bash(git add:*)",
       "Bash(git -C /Users/peter/Documents/DocsMBPPve/apps/2026/cc-docker-test/nanobot status)",
-      "Bash(git -C /Users/peter/Documents/DocsMBPPve/apps/2026/cc-docker-test remote -v)"
+      "Bash(git -C /Users/peter/Documents/DocsMBPPve/apps/2026/cc-docker-test remote -v)",
+      "Bash(ssh:*)",
+      "Bash(git commit -m 'fix: correct CLAUDE.md.template path in setup-dev.sh *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

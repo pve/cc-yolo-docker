@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # package.sh — build, tag, and push image to the container registry
-# Run inside cc-dev: /scripts/package.sh [extra-tag]
-# Example: /scripts/package.sh rc1
+# Run inside cc-dev: /root/scripts/package.sh [extra-tag]
+# Example: /root/scripts/package.sh rc1
 
 set -euo pipefail
 
-WORKSPACE="/workspace"
+WORKSPACE="/root/workspace"
 
 cd "${WORKSPACE}"
 
