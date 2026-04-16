@@ -8,7 +8,7 @@
 **Target fork:** https://github.com/pve/nanobot-ai  
 **Upstream:** https://github.com/HKUDS/nanobot  
 **Registry:** ghcr.io/pve/nanobot-ai  
-**Host:** Single remote amd64 Linux host, accessed via SSH
+**Host:** Single remote arm64 Linux host (Hetzner, Ubuntu 24.04), accessed via SSH
 
 ---
 
