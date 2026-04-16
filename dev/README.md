@@ -82,13 +82,13 @@ ssh nanobot-dev          # terminal into cc-dev-main
 ### One-time bootstrap
 
 ```bash
-ssh nanobot-host
+ssh hetznerhost.griddlejuiz.com
 
-# Clone the infrastructure repo
-git clone https://github.com/pve/nanobot-ai.git   # or copy cc-docker-test/ here
-cd cc-docker-test/dev
+# Clone the infrastructure repo (public, no auth needed)
+git clone https://github.com/pve/cc-docker-test.git /root/cc-docker-test
+cd /root/cc-docker-test/dev
 
-# Configure environment
+# Configure environment (copy example, fill in secrets)
 cp .env.dev.example .env.dev
 vim .env.dev    # fill in GITHUB_TOKEN, GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL, SSH_AUTHORIZED_KEY
 
@@ -96,11 +96,12 @@ vim .env.dev    # fill in GITHUB_TOKEN, GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL, SSH_A
 docker build -f Dockerfile.cc-dev -t cc-dev .
 
 # Spawn the first dev instance
-chmod +x scripts/*.sh
 scripts/spawn-dev.sh main
 ```
 
 `spawn-dev.sh` prints the assigned SSH port and the `~/.ssh/config` snippet to add locally.
+
+To update the infrastructure later: `git pull` in `/root/cc-docker-test`, then rebuild the image.
 
 That's all that happens on the remote host. From here on, Claude Code inside the container manages the dev environment.
 
