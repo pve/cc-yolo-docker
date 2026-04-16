@@ -61,7 +61,7 @@ git merge --ff-only upstream/main || {
 
 echo "==> Generating CLAUDE.md in workspace (if not already present)"
 if [ ! -f "${WORKSPACE}/CLAUDE.md" ]; then
-    envsubst < /scripts/../CLAUDE.md.template > "${WORKSPACE}/CLAUDE.md"
+    envsubst < /scripts/CLAUDE.md.template > "${WORKSPACE}/CLAUDE.md"
     cd "${WORKSPACE}"
     git add CLAUDE.md
     git commit -m "chore: add CLAUDE.md for cc-dev environment
