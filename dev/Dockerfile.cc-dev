@@ -57,9 +57,10 @@ RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh && \
 
 WORKDIR /workspace
 
-# Copy all dev scripts into the image so CC can run them from inside the container
-# (spawn-dev.sh, ls-dev.sh, setup-dev.sh, package.sh, entrypoint.sh)
+# Copy scripts and CLAUDE.md template into the image
+# Scripts are available to CC at /scripts/; template is rendered by setup-dev.sh
 COPY scripts/ /scripts/
+COPY CLAUDE.md.template /scripts/CLAUDE.md.template
 RUN chmod +x /scripts/*.sh
 
 ENTRYPOINT ["/scripts/entrypoint.sh"]

@@ -17,11 +17,14 @@ services:
       - "${SSH_PORT}:22"
     environment:
       - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_USER=${GITHUB_USER}
+      - FORK_REPO_PATH=${FORK_REPO_PATH}
+      - UPSTREAM_URL=${UPSTREAM_URL}
+      - REGISTRY=${REGISTRY}
       - GIT_AUTHOR_NAME=${GIT_AUTHOR_NAME}
       - GIT_AUTHOR_EMAIL=${GIT_AUTHOR_EMAIL}
       - GIT_COMMITTER_NAME=${GIT_AUTHOR_NAME}
       - GIT_COMMITTER_EMAIL=${GIT_AUTHOR_EMAIL}
-      - FORK_REPO=github.com/pve/nanobot-ai
       - SSH_AUTHORIZED_KEY=${SSH_AUTHORIZED_KEY}
     networks:
       - nanobot-dev-net

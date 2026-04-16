@@ -1,7 +1,11 @@
-# PRD: Nanobot Dev/Acc/Prod Environment with Claude Code
+# PRD: Isolated Dev/Acc/Prod Environment with Claude Code
+
+> **This repo is a generic framework.** Target project details are configuration, not code.  
+> Current deployment: `pve/nanobot-ai` (fork of `HKUDS/nanobot`)
 
 **Date:** 2026-04-16  
-**Fork:** https://github.com/pve/nanobot-ai  
+**Framework repo:** `cc-docker-test` (this repo, no application code)  
+**Target fork:** https://github.com/pve/nanobot-ai  
 **Upstream:** https://github.com/HKUDS/nanobot  
 **Registry:** ghcr.io/pve/nanobot-ai  
 **Host:** Single remote amd64 Linux host, accessed via SSH
@@ -181,7 +185,7 @@ Tasks CC handles automatically (no manual steps required):
 
 | Task | How |
 |------|-----|
-| Add GitHub deploy key | `gh api repos/pve/nanobot-ai/keys` — runs in `setup-dev.sh`, no browser needed |
+| Add GitHub deploy key | `gh api repos/${FORK_REPO_PATH}/keys` — runs in `setup-dev.sh`, no browser needed |
 | Clone + sync fork with upstream | `setup-dev.sh` clones fork and fast-forwards to upstream/main |
 | gh CLI + ghcr.io auth | `setup-dev.sh` logs in using `GITHUB_TOKEN` env var |
 | Build + tag + push image | `package.sh` — CC runs this after tests pass |
@@ -214,8 +218,9 @@ cc-docker-test/
 │       ├── entrypoint.sh           ← starts sshd, injects authorized_keys
 │       ├── spawn-dev.sh            ← create named instance (wraps docker compose -p)
 │       ├── ls-dev.sh               ← list running dev instances + ports
-│       ├── setup-dev.sh            ← one-time: fully automated (deploy key via gh API, clone, auth)
+│       ├── setup-dev.sh            ← one-time: deploy key, clone, auth, render CLAUDE.md
 │       └── package.sh              ← build + tag + push to ghcr.io
+│   └── CLAUDE.md.template          ← rendered into /workspace/CLAUDE.md by setup-dev.sh
 │
 ├── acc/
 │   ├── README.md                   ← acc setup instructions (Phase 2)
@@ -236,7 +241,8 @@ cc-docker-test/
 - `Dockerfile.cc-dev`: Ubuntu 24.04 + Claude Code + docker CLI + git + gh CLI + sshd
 - `spawn-dev.sh`: create a named dev instance (auto-assign port, create volumes, start container)
 - `ls-dev.sh`: list running instances with ports
-- `setup-dev.sh`: clone fork, configure git, gh auth, SSH deploy key, ghcr.io login
+- `setup-dev.sh`: clone fork, configure git, gh auth, deploy key, ghcr.io login, render + commit CLAUDE.md
+- `CLAUDE.md.template`: generic infrastructure context, rendered with env vars into `/workspace/CLAUDE.md`
 - `package.sh`: build nanobot image, tag with SHA, push to ghcr.io
 - `dev/README.md`: setup instructions and overview
 

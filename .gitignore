@@ -1,0 +1,4 @@
+# Never commit environment files — they contain secrets
+dev/.env.dev
+acc/.env.acc
+prod/.env.prod

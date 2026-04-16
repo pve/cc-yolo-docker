@@ -6,6 +6,50 @@ There are three tiers of access. Each tier has a distinct role in setup and ongo
 
 ---
 
+## GitHub Token
+
+Everything in the dev environment authenticates with a single GitHub Personal Access Token (PAT). It is stored in `.env.dev` on the remote host and injected into each container at startup.
+
+### Creating the token
+
+Go to **https://github.com/settings/personal-access-tokens/new** and create a **fine-grained PAT**:
+
+| Setting | Value |
+|---------|-------|
+| Resource owner | your user or org |
+| Repository access | Only select repositories → your fork |
+| Expiry | 90 days (set a calendar reminder to rotate) |
+
+Under **Repository permissions**, set:
+
+| Permission | Level |
+|------------|-------|
+| Contents | Read and write |
+| Pull requests | Read and write |
+| Administration | Read and write |
+| Metadata | Read (automatic) |
+
+Under **Account permissions**, set:
+
+| Permission | Level |
+|------------|-------|
+| Packages | Read and write |
+
+`Administration: Read and write` is needed so `setup-dev.sh` can add and rotate the container's SSH deploy key via the GitHub API — no manual browser step required.  
+`Packages: Read and write` covers pushing and pulling images to/from `ghcr.io`.
+
+### Where it goes
+
+Paste the generated token into `.env.dev` as `GITHUB_TOKEN`. It is passed to each container as an environment variable and used by:
+
+- `gh auth login` — GitHub CLI
+- `docker login ghcr.io` — container registry push/pull
+- `gh api repos/.../keys` — deploy key management
+
+`.env.dev` is listed in `.gitignore` and must never be committed.
+
+---
+
 ## Tier 1 — Local machine (your laptop)
 
 **Role:** SSH client only. Nothing runs here except your terminal and VS Code.
@@ -149,5 +193,6 @@ docker compose -p cc-dev-feature-x -f /path/to/docker-compose.dev.yml down -v
 | `scripts/entrypoint.sh` | Container (PID 1) | Injects `authorized_keys`, starts sshd |
 | `scripts/spawn-dev.sh` | Remote host or CC in container | Create a named dev instance |
 | `scripts/ls-dev.sh` | Remote host or CC in container | List instances + SSH ports |
-| `scripts/setup-dev.sh` | CC in container (once) | Clone fork, auth, deploy key — fully automated |
+| `scripts/setup-dev.sh` | CC in container (once) | Clone fork, auth, deploy key, render + commit CLAUDE.md — fully automated |
 | `scripts/package.sh` | CC in container | Build + tag + push image to ghcr.io |
+| `CLAUDE.md.template` | `setup-dev.sh` | Template rendered into `/workspace/CLAUDE.md` on first setup |
