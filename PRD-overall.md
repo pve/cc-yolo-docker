@@ -262,6 +262,14 @@ cc-docker-test/
 
 ---
 
+## Backlog
+
+- **Docker credential store warning**: `docker login ghcr.io` warns that credentials are stored unencrypted in `/root/.docker/config.json`. Configure a credential helper (e.g. `pass`) or accept the risk given the container is ephemeral and access-controlled.
+- **CLAUDE.md already exists — skipping**: On re-runs of `setup-dev.sh`, the CLAUDE.md generation is skipped. If the template changes, there is no mechanism to update an existing CLAUDE.md in the workspace. Consider a `--force` flag or a version check.
+- **Fork ahead of origin**: After upstream sync, workspace main is ahead of `origin/main` by the upstream commits. A `git push origin main` should follow the merge to keep the fork current on GitHub.
+
+---
+
 ## Open Questions (to be decided during implementation)
 
 - Which AI provider + API key for each nanobot environment config?
