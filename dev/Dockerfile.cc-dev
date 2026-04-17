@@ -48,6 +48,7 @@ RUN mkdir -p /var/run/sshd && \
         -e 's/#PasswordAuthentication.*/PasswordAuthentication no/' \
         -e 's/#PubkeyAuthentication.*/PubkeyAuthentication yes/' \
         -e 's/UsePAM yes/UsePAM no/' \
+        -e 's/#PermitUserEnvironment.*/PermitUserEnvironment yes/' \
         /etc/ssh/sshd_config
 
 # SSH client config: disable strict host checking for github.com
