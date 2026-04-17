@@ -1,7 +1,7 @@
 # PRD: Phase 1 — Dev Environment
 
 ## Overview
-A containerized dev environment on a single remote amd64 host where Claude Code lives inside `cc-dev`, has full control over the nanobot codebase, and packages built images to ghcr.io for downstream environments.
+A containerized dev environment on a single remote arm64 host (Hetzner, Ubuntu 24.04) where Claude Code lives inside `cc-dev`, has full control over the nanobot codebase, and packages built images to ghcr.io for downstream environments.
 
 ---
 
@@ -53,22 +53,24 @@ cc-dev container (remote host)
 ### Environment variables (passed at runtime)
 | Variable | Purpose |
 |----------|---------|
-| `GITHUB_TOKEN` | GitHub PAT with `repo` + `packages:write` + `read:packages` scope. Used by gh CLI and docker login to ghcr.io |
+| `GITHUB_TOKEN` | GitHub classic PAT with `repo` + `packages:write` + `read:packages` scope. Used by gh CLI and docker login to ghcr.io |
+| `GITHUB_USER` | GitHub username; used for ghcr.io login |
+| `FORK_REPO_PATH` | `user/repo` format, e.g. `pve/nanobot-ai` |
+| `UPSTREAM_URL` | HTTPS URL of the upstream repo to sync from |
+| `REGISTRY` | ghcr.io image path without tag, e.g. `ghcr.io/pve/nanobot-ai` |
 | `GIT_AUTHOR_NAME` | Git commit identity |
 | `GIT_AUTHOR_EMAIL` | Git commit identity |
-| `FORK_REPO` | e.g. `github.com/youruser/nanobot` |
+| `SSH_AUTHORIZED_KEY` | User's local public key — written to `/root/.ssh/authorized_keys` at startup |
+| `CLAUDE_CODE_OAUTH_TOKEN` | OAuth token for Claude Code auth. Generated once via `claude setup-token` on the local machine. Bypasses macOS Keychain (unavailable in containers/SSH). Survives container rebuilds. |
 
 ### Network
 - Attached to `nanobot-dev-net` only
 - No access to `nanobot-acc-net` or `nanobot-prod-net`
 
 ### Startup
-Container runs persistently (does not exit). Entry: `sleep infinity` or a shell init script that keeps it alive. User enters via:
+Container runs persistently via `sshd -D`. User enters directly via SSH — no `docker exec` needed:
 ```bash
-# From remote host
-docker exec -it cc-dev bash
-
-# Or via VS Code: Remote-SSH to host → Dev Containers → Attach to cc-dev
+ssh nanobot-main   # or nanobot-<instance>
 ```
 
 ---
@@ -106,19 +108,26 @@ docker run --rm \
 
 ---
 
-## GitHub Auth
+## Auth
 
-### SSH key (for git push/pull)
-- Generated once and stored in `cc-dev-ssh` volume
-- Public key added to the nanobot fork as a **deploy key** with write access
-- `git remote` uses `git@github.com:<user>/nanobot.git`
+### SSH key (for git push/pull to GitHub)
+
+- Generated once inside the container and stored in the `ssh` named volume (persists across rebuilds)
+- Public key registered as a deploy key on the fork via `gh api` — done automatically by `setup-dev.sh`
+- `git remote` uses `git@github.com:<user>/nanobot-ai.git`
 
 ### GITHUB_TOKEN (for gh CLI + GHCR)
-- Fine-grained PAT or classic PAT
-- Required scopes: `repo`, `packages:write`, `read:packages`
-- Passed as env var at container startup
-- `gh auth login --with-token <<< $GITHUB_TOKEN` run on first start
-- `echo $GITHUB_TOKEN | docker login ghcr.io -u <github-user> --password-stdin` for image push
+
+- Classic PAT — required scopes: `repo`, `packages:write`, `read:packages`
+- Passed as env var; `gh` CLI picks it up automatically, no `gh auth login` needed
+- `setup-dev.sh` runs `docker login ghcr.io` using the token on first setup
+
+### CLAUDE_CODE_OAUTH_TOKEN (for Claude Code)
+
+- Generated once on the local machine: `claude setup-token`
+- Stored in `.env.dev` (gitignored); copied to the remote host via `scp` (see Deployment Workflow)
+- Injected as env var at container startup and forwarded to SSH sessions via `/root/.ssh/environment`
+- Survives container rebuilds — no interactive `claude` login ever needed inside the container
 
 ---
 
@@ -171,14 +180,86 @@ Tags:
 
 ---
 
-## Setup Sequence (one-time, run on remote host)
+## Deployment Workflow
 
-1. Clone this repo to remote host
-2. Copy `.env.dev.example` → `.env.dev`, fill in tokens and user details
-3. `docker compose -f docker-compose.dev.yml up -d` → creates network, volumes, starts cc-dev
-4. `docker exec cc-dev /scripts/setup-dev.sh` → clones fork, configures git, logs into gh and ghcr.io, generates SSH key
-5. User adds displayed public key to GitHub fork as deploy key
-6. `docker exec -it cc-dev bash` → CC is ready
+### First-time host setup (run once)
+
+```bash
+# 1. On remote host: clone the framework repo
+ssh hetznerhost.griddlejuiz.com
+git clone https://github.com/pve/cc-docker-test.git /root/cc-docker-test
+exit
+
+# 2. On local machine: generate Claude Code OAuth token (opens browser once)
+claude setup-token
+# Copy the printed token
+
+# 3. On local machine: fill in .env.dev
+cp dev/.env.dev.example dev/.env.dev
+# Edit dev/.env.dev — fill in GITHUB_TOKEN, CLAUDE_CODE_OAUTH_TOKEN, and other vars
+
+# 4. Copy .env.dev to the remote host (.env.dev is gitignored — never committed)
+scp dev/.env.dev hetznerhost.griddlejuiz.com:/root/cc-docker-test/dev/.env.dev
+
+# 5. On local machine: add entry to ~/.ssh/config
+# Host nanobot-main
+#   HostName hetznerhost.griddlejuiz.com
+#   Port 2222
+#   User root
+#   IdentityFile ~/.ssh/id_ecdsa
+```
+
+### Spawning a dev instance (run once per instance)
+
+```bash
+# On local machine: spawn the instance (builds image on remote host via ssh-forwarded Docker context,
+# or run spawn-dev.sh directly on the host)
+ssh hetznerhost.griddlejuiz.com 'cd /root/cc-docker-test/dev && bash scripts/spawn-dev.sh main'
+
+# One-time setup inside the container (clones fork, adds deploy key, renders CLAUDE.md)
+ssh hetznerhost.griddlejuiz.com 'docker exec cc-dev-main /root/scripts/setup-dev.sh'
+
+# SSH in
+ssh nanobot-dev
+```
+
+### Updating the framework (code changes to scripts/Dockerfile/compose)
+
+```bash
+# 1. On local machine: commit and push changes
+git add <files>
+git commit -m "..."
+git push origin main
+
+# 2. On remote host: pull latest
+ssh hetznerhost.griddlejuiz.com 'cd /root/cc-docker-test && git pull'
+
+# 3. Take down and respawn (rebuilds the image with updated scripts/Dockerfile)
+ssh hetznerhost.griddlejuiz.com \
+  'cd /root/cc-docker-test/dev && \
+   docker compose -p cc-dev-main down && \
+   bash scripts/spawn-dev.sh main'
+```
+
+> Volumes (`workspace`, `ssh`, `home`, `data`) are preserved across respawn — named volumes are not removed by `docker compose down` without `-v`.
+
+### Updating secrets (.env.dev changes)
+
+`.env.dev` is gitignored and never committed. When secrets change (token rotation, new var added):
+
+```bash
+# Edit locally
+vi dev/.env.dev
+
+# Copy to remote host
+scp dev/.env.dev hetznerhost.griddlejuiz.com:/root/cc-docker-test/dev/.env.dev
+
+# Respawn to pick up new env vars
+ssh hetznerhost.griddlejuiz.com \
+  'cd /root/cc-docker-test/dev && \
+   docker compose -p cc-dev-main down && \
+   bash scripts/spawn-dev.sh main'
+```
 
 ---
 
