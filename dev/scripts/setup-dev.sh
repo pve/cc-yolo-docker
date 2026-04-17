@@ -8,8 +8,7 @@ set -euo pipefail
 FORK_SSH="git@github.com:${FORK_REPO_PATH}.git"
 WORKSPACE="/root/workspace"
 
-echo "==> Authenticating gh CLI"
-echo "${GITHUB_TOKEN}" | gh auth login --with-token
+echo "==> gh CLI will use GITHUB_TOKEN from environment automatically"
 
 echo "==> Logging into container registry"
 echo "${GITHUB_TOKEN}" | docker login ghcr.io -u "${GITHUB_USER}" --password-stdin
