@@ -25,14 +25,17 @@ fi
 
 KEY_TITLE="cc-dev-$(hostname)"
 PUB_KEY="$(cat /root/.ssh/id_ed25519.pub)"
+KEY_MATERIAL="$(echo "${PUB_KEY}" | awk '{print $1, $2}')"
 
 echo "==> Adding deploy key '${KEY_TITLE}' to ${FORK_REPO_PATH}"
-EXISTING_KEY_ID=$(gh api "repos/${FORK_REPO_PATH}/keys" \
-    --jq ".[] | select(.title == \"${KEY_TITLE}\") | .id" 2>/dev/null || true)
-if [ -n "${EXISTING_KEY_ID}" ]; then
-    echo "    Removing existing key with same title (id=${EXISTING_KEY_ID})"
-    gh api -X DELETE "repos/${FORK_REPO_PATH}/keys/${EXISTING_KEY_ID}"
-fi
+# Remove any key with the same title OR same key material (handles container hostname changes)
+while IFS= read -r key_id; do
+    [ -z "${key_id}" ] && continue
+    echo "    Removing existing key (id=${key_id})"
+    gh api -X DELETE "repos/${FORK_REPO_PATH}/keys/${key_id}"
+done < <(gh api "repos/${FORK_REPO_PATH}/keys" \
+    --jq ".[] | select(.title == \"${KEY_TITLE}\" or (.key | startswith(\"${KEY_MATERIAL}\"))) | .id" \
+    2>/dev/null || true)
 gh api "repos/${FORK_REPO_PATH}/keys" \
     -f title="${KEY_TITLE}" \
     -f key="${PUB_KEY}" \

@@ -24,6 +24,19 @@ for var in GITHUB_TOKEN GITHUB_USER FORK_REPO_PATH UPSTREAM_URL REGISTRY \
 done
 chmod 600 /root/.ssh/environment
 
+# Persist /root/.claude.json inside the home volume so it survives rebuilds.
+# Claude Code writes config here; the home volume covers /root/.claude/ (a directory)
+# but not /root/.claude.json (a separate file). We store the real file inside the
+# volume and symlink it back.
+CLAUDE_JSON_STORE="/root/.claude/.claude.json"
+CLAUDE_JSON_LINK="/root/.claude.json"
+if [ -f "${CLAUDE_JSON_LINK}" ] && [ ! -L "${CLAUDE_JSON_LINK}" ]; then
+    mv "${CLAUDE_JSON_LINK}" "${CLAUDE_JSON_STORE}"
+fi
+if [ -f "${CLAUDE_JSON_STORE}" ]; then
+    ln -sf "${CLAUDE_JSON_STORE}" "${CLAUDE_JSON_LINK}"
+fi
+
 # Generate host keys if not already present (needed on first start)
 ssh-keygen -A
 
