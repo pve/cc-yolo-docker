@@ -12,6 +12,7 @@ You are running inside a **cc-dev-${INSTANCE}** container on a remote Docker hos
 | Fork | `${FORK_REPO_PATH}` |
 | Registry | `${REGISTRY}` |
 | Scripts | `/opt/cc/scripts/` — baked into this image |
+| AI backend | OpenRouter — `OPENROUTER_API_KEY` env var is set |
 
 You are in **dev**. You do not have access to acceptance or production environments.
 

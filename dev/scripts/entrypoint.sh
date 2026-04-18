@@ -18,7 +18,7 @@ fi
 rm -f /home/claude/.ssh/environment
 for var in GITHUB_TOKEN GITHUB_USER FORK_REPO_PATH UPSTREAM_URL REGISTRY \
            GIT_AUTHOR_NAME GIT_AUTHOR_EMAIL GIT_COMMITTER_NAME GIT_COMMITTER_EMAIL \
-           CLAUDE_CODE_OAUTH_TOKEN COLORTERM; do
+           CLAUDE_CODE_OAUTH_TOKEN COLORTERM OPENROUTER_API_KEY; do
     if [ -n "${!var:-}" ]; then
         echo "${var}=${!var}" >> /home/claude/.ssh/environment
     fi

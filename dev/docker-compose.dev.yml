@@ -26,6 +26,7 @@ services:
       - GIT_COMMITTER_EMAIL=${GIT_AUTHOR_EMAIL}
       - SSH_AUTHORIZED_KEY=${SSH_AUTHORIZED_KEY}
       - CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_OAUTH_TOKEN}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
     networks:
       - nanobot-dev-net
     restart: unless-stopped
