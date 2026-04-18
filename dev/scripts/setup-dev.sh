@@ -66,7 +66,7 @@ git merge --ff-only upstream/main || {
 }
 
 echo "==> Installing nanobot (editable) with uv"
-uv venv --quiet "${WORKSPACE}/.venv"
+uv venv --quiet --allow-existing "${WORKSPACE}/.venv"
 VIRTUAL_ENV="${WORKSPACE}/.venv" uv pip install --no-cache -e "${WORKSPACE}"
 
 echo "==> Rendering CLAUDE.md from template"
