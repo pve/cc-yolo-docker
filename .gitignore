@@ -3,3 +3,4 @@ dev/.env.dev
 acc/.env.acc
 prod/.env.prod
 .claude/settings.local.json
+.claude/settings.local.json

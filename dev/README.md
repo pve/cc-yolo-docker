@@ -1,3 +1,8 @@
+This experiment started when I wanted to automatically set up nanobot instances for testing and development and have Claude Code run dangerously to do so.
+
+The overall idea is to create containers on a remote host.
+So even your local Docker setup is not touched.
+
 # Dev Environment
 
 Claude Code runs inside `cc-dev-<instance>` containers on the remote host. Multiple named instances can run simultaneously — one per feature branch or experiment.
