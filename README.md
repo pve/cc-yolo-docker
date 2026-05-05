@@ -1,7 +1,8 @@
 This repo deploys a container on a remote host with Claude Code installed inside it.
 So even your local Docker setup is not touched.
 
-It was originally conceived for testing and developing nanobot instances with a dangerously running Claude Code.
+It was originally conceived for testing and developing nanobot instances with a dangerously running Claude Code instance.
+That instance can fully control a nanobot instance, including viewing all its files and logfiles.
 
 # Dev Environment
 
@@ -44,6 +45,7 @@ Paste the generated token into `.env.dev` as `GITHUB_TOKEN`. It is passed to eac
 ## Tier 1 — Local machine (your laptop)
 
 **Role:** SSH client only. Nothing runs here except your terminal and VS Code.
+Presumably though, you can run another Claude Code here to orchestrate your experiments.
 
 ### One-time setup
 
@@ -68,9 +70,11 @@ After bootstrap, you only ever use the `nanobot-dev` (port 2222) entry — you S
 
 ### Ongoing use
 
+From tier 1 (developer laptop)
+
 ```bash
 ssh nanobot-dev          # terminal into cc-dev-main
-# or: open VS Code → Remote-SSH → nanobot-main
+# or: open VS Code → Remote-SSH → nanobot-dev
 ```
 
 ---
@@ -90,8 +94,8 @@ ssh nanobot-dev          # terminal into cc-dev-main
 ssh hetznerhost.griddlejuiz.com
 
 # Clone the infrastructure repo (public, no auth needed)
-git clone https://github.com/pve/cc-docker-test.git /root/cc-docker-test
-cd /root/cc-docker-test/dev
+git clone https://github.com/pve/cc-yolo-docker.git /root/cc-yolo-docker
+cd /root/cc-yolo-docker/dev
 
 # Configure environment (copy example, fill in secrets)
 cp .env.dev.example .env.dev
@@ -100,13 +104,13 @@ vim .env.dev    # fill in GITHUB_TOKEN, GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL, SSH_A
 # Build the cc-dev image
 docker build -f Dockerfile.cc-dev -t cc-dev .
 
-# Spawn the first dev instance
+# Spawn the first dev instance, and name it.
 scripts/spawn-dev.sh main
 ```
 
 `spawn-dev.sh` prints the assigned SSH port and the `~/.ssh/config` snippet to add locally.
 
-To update the infrastructure later: `git pull` in `/root/cc-docker-test`, then rebuild the image.
+To update the infrastructure later: `git pull` in `/root/cc-yolo-docker`, then rebuild the image.
 
 That's all that happens on the remote host. From here on, Claude Code inside the container manages the dev environment.
 
@@ -116,11 +120,24 @@ That's all that happens on the remote host. From here on, Claude Code inside the
 
 **Role:** Where all development happens. Claude Code has full control: code, Docker, git, gh CLI, package builds.
 
+### Prerequisites
+
+None, as all are included in the Dockerfile.
+
 ### One-time setup (first SSH session)
 
 ```bash
 ssh nanobot-main
 /root/scripts/setup-dev.sh
+```
+or
+```
+ssh -p <port> -i 
+```
+
+Alternatively, run this through 
+```
+docker exec -u claude cc-dev-dev1 /opt/cc/scripts/setup-dev.sh
 ```
 
 `setup-dev.sh` is fully automated — no browser, no manual steps:
@@ -147,8 +164,9 @@ After this, run `claude` and CC takes over.
 ### Ongoing workflow
 
 ```bash
-ssh nanobot-main
+ssh nanobot-main # or Connect to: from VScode, which picks up from ~/.ssh/config, and gives you a file browser as well
 claude                              # start Claude Code
+claude --dangerously-skip-permissions # Run CC in yolo mode.
 
 # CC works autonomously — edits code, runs tests, reads logs, fixes issues
 # When ready to package:
@@ -157,10 +175,11 @@ claude                              # start Claude Code
 # To work on a parallel branch, CC spawns a new instance:
 /root/scripts/spawn-dev.sh feature-x    # creates cc-dev-feature-x, prints new port
 ```
-
 ---
 
 ## Instance management
+
+From tier 2:
 
 ```bash
 # List all dev instances and their SSH ports

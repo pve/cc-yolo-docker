@@ -4,7 +4,7 @@
 > Current deployment: `pve/nanobot-ai` (fork of `HKUDS/nanobot`)
 
 **Date:** 2026-04-16  
-**Framework repo:** `cc-docker-test` (this repo, no application code)  
+**Framework repo:** `cc-yolo-docker` (this repo, no application code)  
 **Target fork:** https://github.com/pve/nanobot-ai  
 **Upstream:** https://github.com/HKUDS/nanobot  
 **Registry:** ghcr.io/pve/nanobot-ai  
@@ -209,7 +209,7 @@ Tasks that remain manual (by design):
 ## File Structure
 
 ```
-cc-docker-test/
+cc-yolo-docker/
 ├── PRD-overall.md                  ← this file
 ├── PRD-phase1.md                   ← detailed Phase 1 PRD
 │

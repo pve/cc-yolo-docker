@@ -1,7 +1,7 @@
 # PRD: Phase 1 — Dev Environment
 
 ## Overview
-A containerized dev environment on a single remote arm64 host (Hetzner, Ubuntu 24.04) where Claude Code lives inside `cc-dev`, has full control over the nanobot codebase, and packages built images to ghcr.io for downstream environments.
+A containerized dev environment on a single remote arm64 host (e.g. Hetzner, Ubuntu 24.04) where Claude Code lives inside `cc-dev`, has full control over the nanobot codebase, and packages built images to ghcr.io for downstream environments.
 
 ---
 
@@ -159,11 +159,11 @@ Tags:
 
 | File | Purpose |
 |------|---------|
-| `cc-docker-test/Dockerfile.cc-dev` | cc-dev container image |
-| `cc-docker-test/docker-compose.dev.yml` | Orchestrates cc-dev + networking + volumes |
-| `cc-docker-test/.env.dev.example` | Template for required env vars |
-| `cc-docker-test/scripts/setup-dev.sh` | One-time remote host setup (create network, volumes, clone fork, init SSH key) |
-| `cc-docker-test/scripts/package.sh` | Image build + tag + push to ghcr.io (run by CC inside cc-dev) |
+| `cc-yolo-docker/Dockerfile.cc-dev` | cc-dev container image |
+| `cc-yolo-docker/docker-compose.dev.yml` | Orchestrates cc-dev + networking + volumes |
+| `cc-yolo-docker/.env.dev.example` | Template for required env vars |
+| `cc-yolo-docker/scripts/setup-dev.sh` | One-time remote host setup (create network, volumes, clone fork, init SSH key) |
+| `cc-yolo-docker/scripts/package.sh` | Image build + tag + push to ghcr.io (run by CC inside cc-dev) |
 
 ---
 
@@ -174,7 +174,7 @@ Tags:
 ```bash
 # 1. On remote host: clone the framework repo
 ssh hetznerhost.griddlejuiz.com
-git clone https://github.com/pve/cc-docker-test.git /root/cc-docker-test
+git clone https://github.com/pve/cc-yolo-docker.git /root/cc-yolo-docker
 exit
 
 # 2. On local machine: generate Claude Code OAuth token (opens browser once)
@@ -186,7 +186,7 @@ cp dev/.env.dev.example dev/.env.dev
 # Edit dev/.env.dev — fill in GITHUB_TOKEN, CLAUDE_CODE_OAUTH_TOKEN, and other vars
 
 # 4. Copy .env.dev to the remote host (.env.dev is gitignored — never committed)
-scp dev/.env.dev hetznerhost.griddlejuiz.com:/root/cc-docker-test/dev/.env.dev
+scp dev/.env.dev hetznerhost.griddlejuiz.com:/root/cc-yolo-docker/dev/.env.dev
 
 # 5. On local machine: add entry to ~/.ssh/config
 # Host nanobot-main
@@ -201,7 +201,7 @@ scp dev/.env.dev hetznerhost.griddlejuiz.com:/root/cc-docker-test/dev/.env.dev
 ```bash
 # On local machine: spawn the instance (builds image on remote host via ssh-forwarded Docker context,
 # or run spawn-dev.sh directly on the host)
-ssh hetznerhost.griddlejuiz.com 'cd /root/cc-docker-test/dev && bash scripts/spawn-dev.sh main'
+ssh hetznerhost.griddlejuiz.com 'cd /root/cc-yolo-docker/dev && bash scripts/spawn-dev.sh main'
 
 # One-time setup inside the container (clones fork, adds deploy key, renders CLAUDE.md)
 ssh hetznerhost.griddlejuiz.com 'docker exec -u claude cc-dev-main /opt/cc/scripts/setup-dev.sh'
@@ -219,11 +219,11 @@ git commit -m "..."
 git push origin main
 
 # 2. On remote host: pull latest
-ssh hetznerhost.griddlejuiz.com 'cd /root/cc-docker-test && git pull'
+ssh hetznerhost.griddlejuiz.com 'cd /root/cc-yolo-docker && git pull'
 
 # 3. Take down and respawn (rebuilds the image with updated scripts/Dockerfile)
 ssh hetznerhost.griddlejuiz.com \
-  'cd /root/cc-docker-test/dev && \
+  'cd /root/cc-yolo-docker/dev && \
    docker compose -p cc-dev-main down && \
    bash scripts/spawn-dev.sh main'
 ```
@@ -239,11 +239,11 @@ ssh hetznerhost.griddlejuiz.com \
 vi dev/.env.dev
 
 # Copy to remote host
-scp dev/.env.dev hetznerhost.griddlejuiz.com:/root/cc-docker-test/dev/.env.dev
+scp dev/.env.dev hetznerhost.griddlejuiz.com:/root/cc-yolo-docker/dev/.env.dev
 
 # Respawn to pick up new env vars
 ssh hetznerhost.griddlejuiz.com \
-  'cd /root/cc-docker-test/dev && \
+  'cd /root/cc-yolo-docker/dev && \
    docker compose -p cc-dev-main down && \
    bash scripts/spawn-dev.sh main'
 ```
