@@ -204,6 +204,6 @@ docker compose -p cc-dev-feature-x -f /path/to/docker-compose.dev.yml down -v
 | `scripts/entrypoint.sh` | Container (PID 1) | Injects `authorized_keys`, starts sshd |
 | `scripts/spawn-dev.sh` | Remote host or CC in container | Create a named dev instance |
 | `scripts/ls-dev.sh` | Remote host or CC in container | List instances + SSH ports |
-| `scripts/setup-dev.sh` | CC in container (once) | Clone fork, auth, deploy key, render + commit CLAUDE.md — fully automated |
+| `scripts/setup-dev.sh` | CC in container (once) | Clone fork, auth, deploy key, render CLAUDE.md — fully automated |
 | `scripts/package.sh` | CC in container | Build + tag + push image to ghcr.io |
-| `CLAUDE.md.template` | `setup-dev.sh` | Template rendered into `/root/workspace/CLAUDE.md` on first setup |
+| `CLAUDE.md.template` | `setup-dev.sh` | Template rendered into `/home/claude/CLAUDE.md` on first setup |

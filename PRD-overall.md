@@ -224,7 +224,7 @@ cc-yolo-docker/
 │       ├── ls-dev.sh               ← list running dev instances + ports
 │       ├── setup-dev.sh            ← one-time: deploy key, clone, auth, render CLAUDE.md
 │       └── package.sh              ← build + tag + push to ghcr.io
-│   └── CLAUDE.md.template          ← rendered into /workspace/CLAUDE.md by setup-dev.sh
+│   └── CLAUDE.md.template          ← rendered into /home/claude/CLAUDE.md by setup-dev.sh
 │
 ├── acc/
 │   ├── README.md                   ← acc setup instructions (Phase 2)
@@ -245,8 +245,8 @@ cc-yolo-docker/
 - `Dockerfile.cc-dev`: Ubuntu 24.04 + Claude Code + docker CLI + git + gh CLI + sshd
 - `spawn-dev.sh`: create a named dev instance (auto-assign port, create volumes, start container)
 - `ls-dev.sh`: list running instances with ports
-- `setup-dev.sh`: clone fork, configure git, gh auth, deploy key, ghcr.io login, render + commit CLAUDE.md
-- `CLAUDE.md.template`: generic infrastructure context, rendered with env vars into `/workspace/CLAUDE.md`
+- `setup-dev.sh`: clone fork, configure git, gh auth, deploy key, ghcr.io login, render CLAUDE.md
+- `CLAUDE.md.template`: generic infrastructure context, rendered with env vars into `/home/claude/CLAUDE.md`
 - `package.sh`: build nanobot image, tag with SHA, push to ghcr.io
 - `dev/README.md`: setup instructions and overview
 
@@ -269,7 +269,6 @@ cc-yolo-docker/
 ## Backlog
 
 - **Docker credential store warning**: `docker login ghcr.io` warns that credentials are stored unencrypted in `/root/.docker/config.json`. Configure a credential helper (e.g. `pass`) or accept the risk given the container is ephemeral and access-controlled.
-- **CLAUDE.md already exists — skipping**: On re-runs of `setup-dev.sh`, the CLAUDE.md generation is skipped. If the template changes, there is no mechanism to update an existing CLAUDE.md in the workspace. Consider a `--force` flag or a version check.
 - **Fork ahead of origin**: After upstream sync, workspace main is ahead of `origin/main` by the upstream commits. A `git push origin main` should follow the merge to keep the fork current on GitHub.
 
 ---
