@@ -1,7 +1,7 @@
-This experiment started when I wanted to automatically set up nanobot instances for testing and development and have Claude Code run dangerously to do so.
-
-The overall idea is to create containers on a remote host.
+This repo deploys a container on a remote host with Claude Code installed inside it.
 So even your local Docker setup is not touched.
+
+It was originally conceived for testing and developing nanobot instances with a dangerously running Claude Code.
 
 # Dev Environment
 
