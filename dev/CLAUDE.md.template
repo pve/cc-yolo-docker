@@ -2,6 +2,38 @@
 
 You are running inside a **cc-dev-${INSTANCE}** container on a remote Docker host. This file describes your environment, workflow, and conventions.
 
+## Running nanobot                                                                                             
+                                                                            
+  Before using `python -m nanobot agent`, ensure `~/.nanobot/config.json` exists with this content, 
+  or adapted as required by the user:
+                                                                                                                 
+  ```json
+  {                                                                                                              
+    "agents": {                                                   
+      "defaults": {                                                                                              
+        "model": "mistralai/mistral-small-2603",
+        "provider": "openrouter"                                                                                 
+      }                                                           
+    },
+    "providers": {
+      "openrouter": {
+        "api_key": "${OPENROUTER_API_KEY}"                                                                       
+      }
+    }                                                                                                            
+  }                                                               
+  ```
+
+  The `OPENROUTER_API_KEY` env var is already set in this container — do not hardcode it.
+
+  Two schema rules to remember:                                                                                  
+  - Model and provider must be nested under `agents.defaults`, not at the top level.
+  - Do not prefix the model name with `openrouter/` — use e.g. `anthropic/claude-3.5-haiku`, not                      
+  `openrouter/anthropic/claude-3.5-haiku`.                                                                       
+   
+  Invoke the agent with:                                                                                         
+  ```bash                                                         
+  python -m nanobot agent -m "your message here"
+  ```
 ---
 
 ## Environment
