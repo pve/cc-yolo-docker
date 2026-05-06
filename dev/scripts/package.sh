@@ -5,33 +5,26 @@
 
 set -euo pipefail
 
-WORKSPACE="/root/workspace"
+WORKSPACE="/home/claude/workspace"
 
 cd "${WORKSPACE}"
 
 GIT_SHA=$(git rev-parse --short HEAD)
 EXTRA_TAG="${1:-}"
 
-echo "==> Building image from ${WORKSPACE}"
-docker build -t "${REGISTRY}:dev-${GIT_SHA}" .
+TAGS="-t ${REGISTRY}:dev-${GIT_SHA} -t ${REGISTRY}:dev"
+[ -n "${EXTRA_TAG}" ] && TAGS="${TAGS} -t ${REGISTRY}:${EXTRA_TAG}"
 
-echo "==> Tagging as :dev (floating latest dev)"
-docker tag "${REGISTRY}:dev-${GIT_SHA}" "${REGISTRY}:dev"
-
-if [ -n "${EXTRA_TAG}" ]; then
-    echo "==> Tagging as :${EXTRA_TAG}"
-    docker tag "${REGISTRY}:dev-${GIT_SHA}" "${REGISTRY}:${EXTRA_TAG}"
-fi
-
-echo "==> Pushing to registry"
-docker push "${REGISTRY}:dev-${GIT_SHA}"
-docker push "${REGISTRY}:dev"
-if [ -n "${EXTRA_TAG}" ]; then
-    docker push "${REGISTRY}:${EXTRA_TAG}"
-fi
+echo "==> Building multiplatform image from ${WORKSPACE}"
+# shellcheck disable=SC2086
+docker buildx build \
+    --platform linux/amd64,linux/arm64 \
+    ${TAGS} \
+    --push \
+    .
 
 echo ""
-echo "==> Packaged:"
-echo "    ${REGISTRY}:dev-${GIT_SHA}"
+echo "==> Pushed:"
+echo "    ${REGISTRY}:dev-${GIT_SHA} (linux/amd64, linux/arm64)"
 echo "    ${REGISTRY}:dev"
 [ -n "${EXTRA_TAG}" ] && echo "    ${REGISTRY}:${EXTRA_TAG}"

@@ -1,6 +1,6 @@
 FROM ubuntu:24.04
 
-ARG TARGETARCH=arm64
+ARG TARGETARCH
 
 ENV DEBIAN_FRONTEND=noninteractive
 
