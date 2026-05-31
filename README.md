@@ -1,7 +1,7 @@
 This repo deploys a container on a remote host with Claude Code installed inside it.
 So even your local Docker setup is not touched.
 
-It was originally conceived for testing and developing nanobot instances with a dangerously running Claude Code instance.
+It was originally conceived for testing and developing *nanobot* instances with a dangerously running Claude Code instance.
 That instance can fully control a nanobot instance, including viewing all its files and logfiles.
 
 # Dev Environment
@@ -65,10 +65,10 @@ Host nanobot-dev
   User root
   IdentityFile ~/.ssh/id_ed25519
 ```
-
+Note that the containers have the same IP address as their host.
 After bootstrap, you only ever use the `nanobot-dev` (port 2222) entry — you SSH straight into the container, bypassing the host.
 
-### Ongoing use
+### Ongoing use after bootstrap
 
 From tier 1 (developer laptop)
 
@@ -100,6 +100,7 @@ cd /root/cc-yolo-docker/dev
 # Configure environment (copy example, fill in secrets)
 cp .env.dev.example .env.dev
 vim .env.dev    # fill in GITHUB_TOKEN, GIT_AUTHOR_NAME, GIT_AUTHOR_EMAIL, SSH_AUTHORIZED_KEY
+# your dev environment might need more secrets, see below
 
 # Build the cc-dev image
 docker build -f Dockerfile.cc-dev -t cc-dev .
@@ -127,8 +128,12 @@ None, as all are included in the Dockerfile.
 ### One-time setup (first SSH session)
 
 ```bash
+
+scp <local files> nanobot-main:
 ssh nanobot-main
 /root/scripts/setup-dev.sh
+# actually:
+/opt/cc/scripts/setup-dev.sh
 ```
 or
 ```
@@ -146,6 +151,7 @@ docker exec -u claude cc-dev-dev1 /opt/cc/scripts/setup-dev.sh
 - Authenticates gh CLI and logs into ghcr.io — both using `GITHUB_TOKEN`
 
 After this, run `claude` and CC takes over.
+This was all created to make `claude --dangerously-skip-permissions` less dangerous.
 
 ### What Claude Code can do from inside the container
 
